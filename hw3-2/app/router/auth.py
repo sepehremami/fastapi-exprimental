@@ -7,19 +7,20 @@ from database import get_db
 from utils import verify
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import RedirectResponse
 
 
 BASE_PATH = Path(__file__).resolve().parent
 router = APIRouter(tags=['Authentication'])
-path = "/home/nolimax/Desktop/MaktabSharif/MaktabSharf_HWs/hw17-fastapi/hw3-2/app/templates"
-path_static = "/home/nolimax/Desktop/MaktabSharif/MaktabSharf_HWs/hw17-fastapi/hw3-2/app/static/"
+path = "/home/zednun/Project/maktab/test/fastapi-exprimental/hw3-2/app/templates"
+path_static = "/home/zednun/Project/maktab/test/fastapi-exprimental/hw3-2/app/static"
 templates = Jinja2Templates(directory=str(path))
 
 router.mount("/static", StaticFiles(directory=path_static))
 
 
 @router.get("/login")
-async def login(request: Request):
+def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -42,7 +43,17 @@ def login_user(request : Request,
             detail="Invalid Credentials"
         )
     access_tocken = oauth2.create_access_tocken(data={"user_id": user.id})
+    response.set_cookie(key="Authorization", value=access_tocken)
+    # response = RedirectResponse(url="/protected",status_code=status.HTTP_302_FOUND)
+
     return templates.TemplateResponse("profile.html", {"access_tocken": access_tocken, "request": request, "response":response, "token_type": "Bearer", "user": user })
+
+# @router.get('/protected')
+# def protected_route(request : Request,
+#                     response:Response,
+#                     user_credentials: OAuth2PasswordRequestForm = Depends(),
+#                     db:Session = Depends(get_db)):
+#      return templates.TemplateResponse("profile.html", {"request": request, "response":response, "token_type": "Bearer"})
 
 # sepehr7890
 # # password : ]v~ehau5i`qdH_8,*;A$-mKie=E/Wc{'Idk#d,qCZKZ5]pl
